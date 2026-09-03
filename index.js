@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import monthlyIndentRoutes from "./routes/monthlyIndentRoutes.js";
+import coverageRoutes from "./routes/coverageRoutes.js";
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.get("/api/health", (req, res) => {
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/monthly-indents", monthlyIndentRoutes);
+app.use("/api/coverage", coverageRoutes);
 
 const PORT = process.env.PORT || 5000;
 

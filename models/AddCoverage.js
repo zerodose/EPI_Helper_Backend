@@ -27,31 +27,43 @@ const vaccineCoverageSchema = new mongoose.Schema(
   { _id: false },
 );
 
-const addCoverageSchema = new mongoose.Schema(
-  {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    userType: {
-    type: String,
-    enum: ["fixed", "outreach"],
+const addCoverageSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
   },
 
-    coverageDate: {
-      type: Date,
-      required: true,
-    },
+  coverageDate: {
+    type: String,
+    required: true,
+    match: /^\d{4}-\d{2}-\d{2}$/,
+  },
 
-    vaccines: {
-      type: [vaccineCoverageSchema],
-      required: true,
-    },
+  vaccines: {
+    type: [vaccineCoverageSchema],
+    required: true,
+  },
+
+  createdAt: {
+    type: String,
+    required: true,
+  },
+
+  updatedAt: {
+    type: String,
+    required: true,
+  },
+});
+
+// One user cannot have two coverage records on the same date.
+addCoverageSchema.index(
+  {
+    user: 1,
+    coverageDate: 1,
   },
   {
-    timestamps: true,
+    unique: true,
   },
 );
 
