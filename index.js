@@ -1,10 +1,10 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-
 import connectDB from "./config/db.js";
-
+import authRoutes from "./routes/authRoutes.js";
 import monthlyIndentRoutes from "./routes/monthlyIndentRoutes.js";
 
 dotenv.config();
@@ -32,6 +32,7 @@ app.get("/api/health", (req, res) => {
 });
 
 // Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/monthly-indents", monthlyIndentRoutes);
 
 const PORT = process.env.PORT || 5000;
