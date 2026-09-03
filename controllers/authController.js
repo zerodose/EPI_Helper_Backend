@@ -6,13 +6,13 @@ import { sendEmail } from "../config/mail.js";
 import { generateVerificationCode } from "../utils/generateCode.js";
 import { successResponse, errorResponse } from "../utils/response.js";
 
-const getCodeExpiry = envName => {
+const getCodeExpiry = (envName) => {
   const minutes = Number(process.env[envName]) || 10;
 
   return new Date(Date.now() + minutes * 60 * 1000);
 };
 
-const generateToken = user => {
+const generateToken = (user) => {
   return jwt.sign(
     {
       id: user._id.toString(),
@@ -131,21 +131,10 @@ const sendPasswordResetEmail = async (user, code) => {
 
 export const signup = async (req, res) => {
   try {
-    const {
-      fullName,
-      email,
-      mobileNumber,
-      password,
-      confirmPassword,
-    } = req.body;
+    const { fullName, email, mobileNumber, password, confirmPassword } =
+      req.body;
 
-    if (
-      !fullName ||
-      !email ||
-      !mobileNumber ||
-      !password ||
-      !confirmPassword
-    ) {
+    if (!fullName || !email || !mobileNumber || !password || !confirmPassword) {
       return errorResponse(res, {
         statusCode: 400,
         message: "All fields are required.",
@@ -173,8 +162,7 @@ export const signup = async (req, res) => {
     if (!/^03\d{9}$/.test(trimmedMobileNumber)) {
       return errorResponse(res, {
         statusCode: 400,
-        message:
-          "Enter a valid 11-digit mobile number starting with 03.",
+        message: "Enter a valid 11-digit mobile number starting with 03.",
       });
     }
 
@@ -299,13 +287,11 @@ export const verifyEmail = async (req, res) => {
       });
     }
 
-    if (
-      !user.emailVerificationCode ||
-      !user.emailVerificationExpires
-    ) {
+    if (!user.emailVerificationCode || !user.emailVerificationExpires) {
       return errorResponse(res, {
         statusCode: 400,
-        message: "Verification code is not available. Please request a new code.",
+        message:
+          "Verification code is not available. Please request a new code.",
       });
     }
 
@@ -421,37 +407,34 @@ export const resendVerificationCode = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { mobileNumber, password } = req.body;
 
-    if (!email || !password) {
+    if (!mobileNumber || !password) {
       return errorResponse(res, {
         statusCode: 400,
-        message: "Email and password are required.",
+        message: "Mobile number and password are required.",
       });
     }
 
-    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedMobileNumber = mobileNumber.trim();
 
     const user = await User.findOne({
-      email: trimmedEmail,
+      mobileNumber: trimmedMobileNumber,
     });
 
     if (!user) {
       return errorResponse(res, {
         statusCode: 401,
-        message: "Invalid email or password.",
+        message: "Invalid mobile number or password.",
       });
     }
 
-    const passwordMatch = await bcrypt.compare(
-      password,
-      user.password,
-    );
+    const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
       return errorResponse(res, {
         statusCode: 401,
-        message: "Invalid email or password.",
+        message: "Invalid mobile number or password.",
       });
     }
 
@@ -523,9 +506,7 @@ export const forgotPassword = async (req, res) => {
     }
 
     const resetCode = generateVerificationCode();
-    const resetExpires = getCodeExpiry(
-      "PASSWORD_RESET_CODE_EXPIRES_MINUTES",
-    );
+    const resetExpires = getCodeExpiry("PASSWORD_RESET_CODE_EXPIRES_MINUTES");
 
     user.passwordResetCode = resetCode;
     user.passwordResetExpires = resetExpires;
@@ -561,12 +542,7 @@ export const forgotPassword = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
   try {
-    const {
-      email,
-      code,
-      newPassword,
-      confirmPassword,
-    } = req.body;
+    const { email, code, newPassword, confirmPassword } = req.body;
 
     if (!email || !code || !newPassword || !confirmPassword) {
       return errorResponse(res, {
@@ -604,10 +580,7 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    if (
-      !user.passwordResetCode ||
-      !user.passwordResetExpires
-    ) {
+    if (!user.passwordResetCode || !user.passwordResetExpires) {
       return errorResponse(res, {
         statusCode: 400,
         message: "Reset code is not available. Please request a new code.",

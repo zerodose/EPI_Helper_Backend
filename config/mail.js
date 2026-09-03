@@ -1,12 +1,5 @@
 import nodemailer from "nodemailer";
 
-console.log("EMAIL CONFIG:", {
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  user: process.env.EMAIL_USER,
-  passwordExists: Boolean(process.env.EMAIL_PASSWORD),
-});
-
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: Number(process.env.EMAIL_PORT) || 587,
