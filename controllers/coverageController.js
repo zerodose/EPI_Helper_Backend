@@ -3,34 +3,7 @@ import mongoose from "mongoose";
 import AddCoverage from "../models/AddCoverage.js";
 import User from "../models/User.js";
 import { successResponse, errorResponse } from "../utils/response.js";
-
-// -----------------------------------------
-// Helper: Get current Pakistan date/time
-// -----------------------------------------
-const getPakistanDateTime = () => {
-  const now = new Date();
-
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Karachi",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hourCycle: "h23",
-  }).formatToParts(now);
-
-  const values = {};
-
-  for (const part of parts) {
-    if (part.type !== "literal") {
-      values[part.type] = part.value;
-    }
-  }
-
-  return `${values.year}-${values.month}-${values.day} ${values.hour}:${values.minute}:${values.second}`;
-};
+import { getPakistanDateTime } from "../utils/dateTime.js";
 
 const allowedVaccines = [
   "BCG",

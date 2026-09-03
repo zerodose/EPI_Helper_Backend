@@ -67,15 +67,11 @@ export const getMonthlyIndents = async (req, res) => {
       }
 
       const startDate = new Date(
-        numericYear,
-        numericMonth - 1,
-        1
+        Date.UTC(numericYear, numericMonth - 1, 1, 0, 0, 0, 0),
       );
 
       const endDate = new Date(
-        numericYear,
-        numericMonth,
-        1
+        Date.UTC(numericYear, numericMonth, 1, 0, 0, 0, 0),
       );
 
       filter.indentDate = {
@@ -92,8 +88,9 @@ export const getMonthlyIndents = async (req, res) => {
         });
       }
 
-      const startDate = new Date(numericYear, 0, 1);
-      const endDate = new Date(numericYear + 1, 0, 1);
+      const startDate = new Date(Date.UTC(numericYear, 0, 1, 0, 0, 0, 0));
+
+      const endDate = new Date(Date.UTC(numericYear + 1, 0, 1, 0, 0, 0, 0));
 
       filter.indentDate = {
         $gte: startDate,
@@ -106,15 +103,20 @@ export const getMonthlyIndents = async (req, res) => {
       month,
     });
 
-    console.log("MONTHLY INDENT FILTER:", filter);
+    console.log("MONTHLY INDENT FILTER:", {
+      indentDate: filter.indentDate
+        ? {
+            $gte: filter.indentDate.$gte.toISOString(),
+            $lt: filter.indentDate.$lt.toISOString(),
+          }
+        : undefined,
+    });
 
-    const monthlyIndents = await MonthlyIndent.find(filter)
-      .sort({ indentDate: -1 });
+    const monthlyIndents = await MonthlyIndent.find(filter).sort({
+      indentDate: -1,
+    });
 
-    console.log(
-      "MONTHLY INDENT RESULT COUNT:",
-      monthlyIndents.length
-    );
+    console.log("MONTHLY INDENT RESULT COUNT:", monthlyIndents.length);
 
     return successResponse(res, {
       statusCode: 200,
