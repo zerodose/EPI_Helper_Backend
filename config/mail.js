@@ -1,67 +1,39 @@
-import nodemailer from "nodemailer";
-import dns from "dns";
+import { Resend } from "resend";
 
-const emailPort = Number(process.env.EMAIL_PORT) || 587;
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-const ipv4Lookup = (hostname, options, callback) => {
-  dns.lookup(hostname, { family: 4 }, callback);
-};
-
-console.log("EMAIL CONFIG:", {
-  host: process.env.EMAIL_HOST,
-  port: emailPort,
-  secure: emailPort === 465,
-  userExists: !!process.env.EMAIL_USER,
-  passwordExists: !!process.env.EMAIL_PASSWORD,
-  from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
-});
-
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "smtp.gmail.com",
-  port: emailPort,
-  secure: emailPort === 465,
-
-  family: 4,
-  lookup: ipv4Lookup,
-
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 30000,
+console.log("RESEND CONFIG:", {
+  apiKeyExists: !!process.env.RESEND_API_KEY,
+  fromEmail: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
 });
 
 export const sendEmail = async ({ to, subject, html }) => {
   try {
     console.log("SENDING EMAIL TO:", to);
 
-    const result = await transporter.sendMail({
-      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
-      to,
+    const { data, error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+      to: [to],
       subject,
       html,
     });
 
-    console.log("EMAIL SENT:", {
-      messageId: result.messageId,
-      response: result.response,
-    });
+    if (error) {
+      console.error("RESEND EMAIL ERROR:", error);
+      throw new Error(error.message || "Email could not be sent");
+    }
 
-    return result;
+    console.log("EMAIL SENT:", data);
+
+    return data;
   } catch (error) {
     console.error("SEND EMAIL ERROR:", {
       message: error.message,
       code: error.code,
-      command: error.command,
-      response: error.response,
-      responseCode: error.responseCode,
     });
 
     throw error;
   }
 };
 
-export default transporter;
+export default resend;
