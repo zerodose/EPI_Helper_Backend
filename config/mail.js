@@ -1,11 +1,11 @@
 import nodemailer from "nodemailer";
 
-const emailPort = Number(process.env.EMAIL_PORT) || 587;
+const emailPort = Number(process.env.EMAIL_PORT) || 465;
 
 console.log("EMAIL CONFIG:", {
   host: process.env.EMAIL_HOST,
   port: emailPort,
-  secure: emailPort === 587,
+  secure: emailPort === 465,
   userExists: !!process.env.EMAIL_USER,
   passwordExists: !!process.env.EMAIL_PASSWORD,
   from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
