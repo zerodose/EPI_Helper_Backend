@@ -1,39 +1,37 @@
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-console.log("RESEND CONFIG:", {
-  apiKeyExists: !!process.env.RESEND_API_KEY,
-  fromEmail: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
-});
+const EMAIL_BRIDGE_URL = process.env.EMAIL_BRIDGE_URL;
+const EMAIL_BRIDGE_SECRET = process.env.EMAIL_BRIDGE_SECRET;
 
 export const sendEmail = async ({ to, subject, html }) => {
-  try {
-    console.log("SENDING EMAIL TO:", to);
+  if (!EMAIL_BRIDGE_URL) {
+    throw new Error("EMAIL_BRIDGE_URL is not configured");
+  }
 
-    const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
-      to: [to],
+  if (!EMAIL_BRIDGE_SECRET) {
+    throw new Error("EMAIL_BRIDGE_SECRET is not configured");
+  }
+
+  const response = await fetch(EMAIL_BRIDGE_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      to,
       subject,
       html,
-    });
+      secret: EMAIL_BRIDGE_SECRET,
+    }),
+  });
 
-    if (error) {
-      console.error("RESEND EMAIL ERROR:", error);
-      throw new Error(error.message || "Email could not be sent");
-    }
+  const data = await response.json();
 
-    console.log("EMAIL SENT:", data);
-
-    return data;
-  } catch (error) {
-    console.error("SEND EMAIL ERROR:", {
-      message: error.message,
-      code: error.code,
-    });
-
-    throw error;
+  if (!response.ok || !data.success) {
+    throw new Error(
+      data.message || "Email could not be sent"
+    );
   }
+
+  return data;
 };
 
-export default resend;
+export default sendEmail;
