@@ -11,6 +11,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import monthlyIndentRoutes from "./routes/monthlyIndentRoutes.js";
 import coverageRoutes from "./routes/coverageRoutes.js";
+import transporter from "./config/mail.js";
 
 const app = express();
 
@@ -41,8 +42,16 @@ app.use("/api/coverage", coverageRoutes);
 
 const PORT = process.env.PORT || 5000;
 
-console.log("JWT_SECRET exists:", !!process.env.JWT_SECRET);
+console.log("JWT_SECRET exists:", !! process.env.JWT_SECRET);
 console.log("JWT_SECRET length:", process.env.JWT_SECRET?.length || 0);
+
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("SMTP VERIFY ERROR:", error);
+  } else {
+    console.log("SMTP SERVER READY:", success);
+  }
+});
 
 app.listen(PORT, () => {
 console.log(`Server running on port ${PORT}`);

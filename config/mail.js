@@ -1,31 +1,9 @@
 import nodemailer from "nodemailer";
 
-const emailPort = Number(process.env.EMAIL_PORT) || 587;
-
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "smtp.gmail.com",
-  port: emailPort,
-
-  // Gmail SMTP:
-  // 587 = STARTTLS
-  // 465 = SSL
-  secure: emailPort === 465,
-
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-
-  // Prefer IPv4 on hosting platforms such as Render
-  family: 4,
-
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 30000,
-});
+const emailPort = Number(process.env.EMAIL_PORT) || 465;
 
 console.log("EMAIL CONFIG:", {
-  host: process.env.EMAIL_HOST || "smtp.gmail.com",
+  host: process.env.EMAIL_HOST,
   port: emailPort,
   secure: emailPort === 465,
   userExists: !!process.env.EMAIL_USER,
@@ -33,13 +11,20 @@ console.log("EMAIL CONFIG:", {
   from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
 });
 
-// Check SMTP connection when the server starts
-transporter.verify((error) => {
-  if (error) {
-    console.error("SMTP VERIFY ERROR:", error);
-  } else {
-    console.log("SMTP READY");
-  }
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: emailPort,
+  secure: emailPort === 465,
+  family: 4,
+
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+
+  connectionTimeout: 30000,
+  greetingTimeout: 30000,
+  socketTimeout: 30000,
 });
 
 export const sendEmail = async ({ to, subject, html }) => {
@@ -60,7 +45,14 @@ export const sendEmail = async ({ to, subject, html }) => {
 
     return result;
   } catch (error) {
-    console.error("SEND EMAIL ERROR:", error);
+    console.error("SEND EMAIL ERROR:", {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode,
+    });
+
     throw error;
   }
 };
