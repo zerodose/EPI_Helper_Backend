@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-const emailPort = Number(process.env.EMAIL_PORT) || 465;
+const emailPort = Number(process.env.EMAIL_PORT) || 587;
 
 console.log("EMAIL CONFIG:", {
   host: process.env.EMAIL_HOST,
