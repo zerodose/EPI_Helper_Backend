@@ -19,17 +19,42 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
+  connectionTimeout: 30000,
+  greetingTimeout: 30000,
+  socketTimeout: 30000,
+});
+
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("SMTP VERIFY ERROR:", error);
+  } else {
+    console.log("SMTP SERVER READY:", success);
+  }
 });
 
 export const sendEmail = async ({ to, subject, html }) => {
-  const mailOptions = {
-    from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
-    to,
-    subject,
-    html,
-  };
+  try {
+    console.log("SENDING EMAIL TO:", to);
 
-  return transporter.sendMail(mailOptions);
+    const mailOptions = {
+      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      to,
+      subject,
+      html,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+
+    console.log("EMAIL SENT:", {
+      messageId: result.messageId,
+      response: result.response,
+    });
+
+    return result;
+  } catch (error) {
+    console.error("SEND EMAIL ERROR:", error);
+    throw error;
+  }
 };
 
 export default transporter;
