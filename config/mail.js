@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-const emailPort = Number(process.env.EMAIL_PORT) || 465;
+const emailPort = Number(process.env.EMAIL_PORT) || 587;
 
 console.log("EMAIL CONFIG:", {
   host: process.env.EMAIL_HOST,
@@ -15,21 +15,17 @@ const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: emailPort,
   secure: emailPort === 465,
+
+  family: 4,
+
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
+
   connectionTimeout: 30000,
   greetingTimeout: 30000,
   socketTimeout: 30000,
-});
-
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("SMTP VERIFY ERROR:", error);
-  } else {
-    console.log("SMTP SERVER READY:", success);
-  }
 });
 
 export const sendEmail = async ({ to, subject, html }) => {
