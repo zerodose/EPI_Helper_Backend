@@ -16,16 +16,27 @@ const transporter = nodemailer.createTransport({
   port: emailPort,
   secure: false,
   family: 4,
-
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
-
   connectionTimeout: 30000,
   greetingTimeout: 30000,
   socketTimeout: 30000,
 });
+
+// YAHAN PASTE KARO
+transporter.verify((err, success) => {
+  if (err) {
+    console.log("SMTP VERIFY ERROR:", err);
+  } else {
+    console.log("SMTP READY");
+  }
+});
+
+export const sendEmail = async ({ to, subject, html }) => {
+  ...
+};
 
 export const sendEmail = async ({ to, subject, html }) => {
   try {
