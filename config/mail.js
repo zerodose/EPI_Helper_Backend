@@ -2,41 +2,45 @@ import nodemailer from "nodemailer";
 
 const emailPort = Number(process.env.EMAIL_PORT) || 587;
 
-console.log("EMAIL CONFIG:", {
-  host: process.env.EMAIL_HOST,
-  port: emailPort,
-  secure: false,
-  userExists: !!process.env.EMAIL_USER,
-  passwordExists: !!process.env.EMAIL_PASSWORD,
-  from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
-});
-
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
+  host: process.env.EMAIL_HOST || "smtp.gmail.com",
   port: emailPort,
-  secure: false,
-  family: 4,
+
+  // Gmail SMTP:
+  // 587 = STARTTLS
+  // 465 = SSL
+  secure: emailPort === 465,
+
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
+
+  // Prefer IPv4 on hosting platforms such as Render
+  family: 4,
+
   connectionTimeout: 30000,
   greetingTimeout: 30000,
   socketTimeout: 30000,
 });
 
-// YAHAN PASTE KARO
-transporter.verify((err, success) => {
-  if (err) {
-    console.log("SMTP VERIFY ERROR:", err);
+console.log("EMAIL CONFIG:", {
+  host: process.env.EMAIL_HOST || "smtp.gmail.com",
+  port: emailPort,
+  secure: emailPort === 465,
+  userExists: !!process.env.EMAIL_USER,
+  passwordExists: !!process.env.EMAIL_PASSWORD,
+  from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+});
+
+// Check SMTP connection when the server starts
+transporter.verify((error) => {
+  if (error) {
+    console.error("SMTP VERIFY ERROR:", error);
   } else {
     console.log("SMTP READY");
   }
 });
-
-export const sendEmail = async ({ to, subject, html }) => {
-  ...
-};
 
 export const sendEmail = async ({ to, subject, html }) => {
   try {
@@ -62,27 +66,3 @@ export const sendEmail = async ({ to, subject, html }) => {
 };
 
 export default transporter;
-// import nodemailer from "nodemailer";
-
-// const transporter = nodemailer.createTransport({
-//   host: process.env.EMAIL_HOST,
-//   port: Number(process.env.EMAIL_PORT) || 587,
-//   secure: Number(process.env.EMAIL_PORT) === 465,
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASSWORD,
-//   },
-// });
-
-// export const sendEmail = async ({to, subject, html}) => {
-//   const mailOptions = {
-//     from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
-//     to,
-//     subject,
-//     html,
-//   };
-
-//   return transporter.sendMail(mailOptions);
-// };
-
-// export default transporter;
