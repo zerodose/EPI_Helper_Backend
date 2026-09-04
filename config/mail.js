@@ -1,6 +1,11 @@
 import nodemailer from "nodemailer";
+import dns from "dns";
 
 const emailPort = Number(process.env.EMAIL_PORT) || 587;
+
+const ipv4Lookup = (hostname, options, callback) => {
+  dns.lookup(hostname, { family: 4 }, callback);
+};
 
 console.log("EMAIL CONFIG:", {
   host: process.env.EMAIL_HOST,
@@ -12,10 +17,12 @@ console.log("EMAIL CONFIG:", {
 });
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
+  host: process.env.EMAIL_HOST || "smtp.gmail.com",
   port: emailPort,
   secure: emailPort === 465,
+
   family: 4,
+  lookup: ipv4Lookup,
 
   auth: {
     user: process.env.EMAIL_USER,
