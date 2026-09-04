@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-const emailPort = Number(process.env.EMAIL_PORT) || 587;
+const emailPort = Number(process.env.EMAIL_PORT) || 465;
 
 console.log("EMAIL CONFIG:", {
   host: process.env.EMAIL_HOST,
@@ -15,7 +15,6 @@ const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: emailPort,
   secure: emailPort === 465,
-
   family: 4,
 
   auth: {
@@ -32,14 +31,12 @@ export const sendEmail = async ({ to, subject, html }) => {
   try {
     console.log("SENDING EMAIL TO:", to);
 
-    const mailOptions = {
+    const result = await transporter.sendMail({
       from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
       to,
       subject,
       html,
-    };
-
-    const result = await transporter.sendMail(mailOptions);
+    });
 
     console.log("EMAIL SENT:", {
       messageId: result.messageId,
@@ -54,7 +51,6 @@ export const sendEmail = async ({ to, subject, html }) => {
 };
 
 export default transporter;
-
 // import nodemailer from "nodemailer";
 
 // const transporter = nodemailer.createTransport({
